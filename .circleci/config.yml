@@ -114,7 +114,7 @@ jobs:
       - restore_cache:
           keys: [frontend-build]
       - run:
-          name: Front End Unit Test
+          name: Front End vulnerability scan
           command: |
              cd frontend
              npm install
