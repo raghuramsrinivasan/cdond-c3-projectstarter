@@ -185,7 +185,7 @@ jobs:
       - run:
           name: Run migrations
           command: |
-            cd backend/migrations
+            cd backend/src/migrations
             npm install
             npm run typeorm migration:run > migrations_dump.txt
       - run: 
