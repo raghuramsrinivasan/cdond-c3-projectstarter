@@ -185,9 +185,9 @@ jobs:
       - run:
           name: Run migrations
           command: |
-            cd backend
+            cd backend/migrations
             npm install
-            npm run migrations > migrations_dump.txt
+            npm run typeorm migration:run > migrations_dump.txt
       - run: 
           name: install curl
           command: apk add --update curl      
