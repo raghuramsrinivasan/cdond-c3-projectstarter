@@ -194,7 +194,7 @@ jobs:
           command: |
             cd backend
             npm install
-            npm run migration > migrations_dump.txt
+            npm run migrations > migrations_dump.txt
       - run: 
           name: install curl
           command: apk add --update curl      
