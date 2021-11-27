@@ -5,7 +5,8 @@ commands:
   destroy-environment:
     description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
     parameters:
-      # Add parameter here   
+      workflow_id:
+         type: string     
     steps:
       - run:
           name: Destroy environments
@@ -18,20 +19,23 @@ commands:
   revert-migrations:
     description: Revert the last migration if successfully run in the current workflow.
     parameters:
-      # Add parameter here     
+      workflow_id:
+         type: string   
     steps:
       - run:
           name: Revert migrations
-          # Add when this will run
+          when: on_fail
           command: |
             # Curl command here to see if there was a successful migration associated with the workflow id, store result in SUCCESS variable
-            SUCCESS = 1
+            SUCCESS=$(curl -H "token: 779f215f-2d5d-45b6-8835-9cb3d1714580" --request GET https://api.memstash.io/values/migration_${CIRCLE_WORKFLOW_ID:0:7})
+            echo $SUCCESS
+                          
             if(( $SUCCESS==1 )); 
             then
-            #  cd ~/project/backend
-            #  npm install
-            #  Add revert code here. You can find this in the Getting Started section.
-              exit 1
+             cd ~/project/backend
+             
+             npm install
+             npm run migrations:revert               
             fi
             
 jobs:
@@ -144,7 +148,7 @@ jobs:
               --template-file .circleci/files/backend.yml \
               --tags project=raghu-udacity-prj3 \
               --stack-name "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}" \
-              --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}"  
+              --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}"  --region=us-east-1
       - run:
           name: Ensure front-end infrastructure exist
           command: |
@@ -152,7 +156,7 @@ jobs:
               --template-file .circleci/files/frontend.yml \
               --tags project=raghu-udacity-prj3 \
               --stack-name "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}" \
-              --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}"  
+              --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}" --region=us-east-1 
             
       - run:
           name: Add back-end ip to ansible inventory
@@ -160,6 +164,7 @@ jobs:
             aws ec2 describe-instances \
             --query 'Reservations[*].Instances[*].PublicIpAddress' \
             --output text >> .circleci/ansible/inventory.txt
+            cat .circleci/ansible/inventory.txt
             
       - persist_to_workspace:
           root: ~/
@@ -171,6 +176,8 @@ jobs:
       - image: python:3.7-alpine3.11 
     steps:
       - checkout
+      - restore_cache:
+          keys: [backend-build]
       - add_ssh_keys: 
           fingerprints: ["3f:04:ee:cd:d9:c7:f5:18:90:65:2f:b7:9b:a6:56:54"]
       - attach_workspace:
@@ -182,13 +189,35 @@ jobs:
       - run:
           name: Configure server
           command: |
+            pwd
+            cat .circleci/ansible/inventory.txt
+            echo ENVIRONMENT=production > "backend/.env"            
+            echo TYPEORM_CONNECTION=postgres >> "backend/.env"
+            echo TYPEORM_ENTITIES=./src/modules/domain/**/*.entity.ts >> "backend/.env"
+            echo TYPEORM_MIGRATIONS=./src/migrations/*.ts >> "backend/.env"
+            echo TYPEORM_MIGRATIONS_DIR=./src/migrations >> "backend/.env"
+            echo NODE_ENV=production >> "backend/.env"
+            echo TYPEORM_HOST=$TYPEORM_HOST >> "backend/.env"
+            echo TYPEORM_PORT=$TYPEORM_PORT >> "backend/.env"
+            echo TYPEORM_USERNAME=$TYPEORM_USERNAME >> "backend/.env"
+            echo TYPEORM_PASSWORD=$TYPEORM_PASSWORD >> "backend/.env"
+            echo TYPEORM_DATABASE=$TYPEORM_DATABASE >> "backend/.env"
             ansible-playbook .circleci/ansible/configure-server.yml -i .circleci/ansible/inventory.txt
+            cat backend/.env
+            ls backend
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - project/backend      
+      
       - destroy-environment   
   run-migrations:
     docker:
       - image: circleci/node:13.8.0
     steps:
       - checkout
+      - restore_cache:
+          keys: [backend-build]
       - run:
           name: Run migrations
           command: |
@@ -240,7 +269,8 @@ jobs:
             npm run build
             tar -czvf artifact-"${CIRCLE_WORKFLOW_ID:0:7}".tar.gz dist
             aws s3 cp dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive
-      - destroy-environment            
+      - destroy-environment     
+      - revert-migrations       
             
         
 workflows:
