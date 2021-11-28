@@ -204,6 +204,7 @@ jobs:
             echo TYPEORM_USERNAME=$TYPEORM_USERNAME >> "backend/.env"
             echo TYPEORM_PASSWORD=$TYPEORM_PASSWORD >> "backend/.env"
             echo TYPEORM_DATABASE=$TYPEORM_DATABASE >> "backend/.env"
+            export ANSIBLE_HOST_KEY_CHECKING=False
             ansible-playbook .circleci/ansible/configure-server.yml -i .circleci/ansible/inventory.txt
             cat backend/.env
             ls backend
@@ -223,12 +224,22 @@ jobs:
       - restore_cache:
           keys: [backend-build]
       - run:
-          name: Run migrations
+          name: install npm
           command: |
             cd backend
             npm install
-            npm run build
+      - run:
+          name: install other dependencies
+          command: |
+            npm install typescript
+            npm --update install python3 npm        
+      - run:
+          name: Run migrations
+          no_output_timeout: 10m
+          command: |
+            cd backend
             npm run migrations > migrations_dump.txt
+            cat migrations_dump.txt
       - run: 
           name: install curl
           command: apk add --update curl      
