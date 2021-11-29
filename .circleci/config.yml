@@ -191,6 +191,7 @@ jobs:
             apk add --update ansible
       - run:
           name: Configure server
+          no_output_timeout: 10m
           command: |
             pwd
             cat .circleci/ansible/inventory.txt
