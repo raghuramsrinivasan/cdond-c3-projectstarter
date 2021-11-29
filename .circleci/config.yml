@@ -299,10 +299,10 @@ jobs:
           name: Install ansible
           command: |
             apk add --update ansible
-	    - run:
+     - run:
           name: install tar
           command: apk add --update tar gzip
-	    - run:
+     - run:
           name: install curl
           command: apk add --update curl
       - run:
@@ -316,14 +316,14 @@ jobs:
       - run:
           name: Install aws cli
           command: |
-            pip install awscli			
+            pip install awscli   
       - run:
           name: Deploy backend
           command: |
             cd backend
-			      npm i
-			      npm run build
-			      cd ..			
+            npm i
+            npm run build
+            cd ..   
             tar -C backend -czvf artifact.tar.gz .
             pwd
             cd .circleci/ansible
