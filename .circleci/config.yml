@@ -355,20 +355,17 @@ jobs:
       - run:
           name: Install aws cli
           command: |
-            pip install awscli 
+            pip install awscli   
       - run:
-          name: Get backend url
+          name: Get back end url and run Backend smoke test.
           command: |
             BACKEND_IP=$(aws ec2 describe-instances \
               --filters "Name=tag:Name, Values=backend-${CIRCLE_WORKFLOW_ID:0:7}" \
               --query 'Reservations[*].Instances[*].PublicIpAddress' \
               --output text)
             echo  "${BACKEND_IP}"
-            export BK_API_URL="http://${BACKEND_IP}:3030"
+            BK_API_URL="http://${BACKEND_IP}:3030"
             echo "${BK_API_URL}"  
-      - run:
-          name: Backend smoke test.
-          command: |
             echo "${BK_API_URL}" 
             APIURL="${BK_API_URL}/api/status"
             echo ${APIURL}
