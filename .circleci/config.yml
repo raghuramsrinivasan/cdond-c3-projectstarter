@@ -409,7 +409,7 @@ workflows:
           requires: [ build-frontend, build-backend]
           filters:
             branches:
-              only: [raghu-uda-project]
+              only: [master]
       - configure-infrastructure:
           requires: [deploy-infrastructure] 
       - run-migrations:
