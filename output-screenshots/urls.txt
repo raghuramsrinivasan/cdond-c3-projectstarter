@@ -3,4 +3,4 @@ Git Hub : https://github.com/raghuramsrinivasan/cdond-c3-projectstarter.git
 (or) https://github.com/raghuramsrinivasan/cdond-c3-projectstarter
  
 S3-url: 
-http://udapeople-ea96bb9.s3-website-us-east-1.amazonaws.com
+http://udapeople-4fd7787.s3-website-us-east-1.amazonaws.com
