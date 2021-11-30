@@ -428,7 +428,7 @@ jobs:
           name: Remove old stacks and files
           command: |
             OLD_WORKFLOWID=$(curl -H "token:${CIRCLE_WORKFLOW_ID:0:7}" --request GET https://api.memstash.io/values/workflowid)
-            export OLD_WORKFLOW_ID="$OLD_WORKFLOWID"
+            export OLD_WORKFLOW_ID="udapeople-$OLD_WORKFLOWID"
             echo Old Workflow Id: "${OLD_WORKFLOW_ID}"
             CurrentWorkflowID="udapeople-${CIRCLE_WORKFLOW_ID:0:7}"
             echo "current workflow ${CurrentWorkflowID}"
