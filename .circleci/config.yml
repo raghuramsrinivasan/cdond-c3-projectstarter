@@ -432,11 +432,12 @@ jobs:
             echo Old Workflow Id: "${OLD_WORKFLOW_ID}"
             CurrentWorkflowID="udapeople-${CIRCLE_WORKFLOW_ID:0:7}"
             echo "current workflow ${CurrentWorkflowID}"
+            echo Old Workflow Id unq: "${OLD_WORKFLOWID}"
             if [[ "${CurrentWorkflowID}" != "${OLD_WORKFLOW_ID}" ]]
             then
               aws s3 rm s3://${OLD_WORKFLOW_ID}/ --recursive
-              aws cloudformation delete-stack --stack-name "udapeople-backend-${OLD_WORKFLOW_ID}"
-              aws cloudformation delete-stack --stack-name "udapeople-frontend-${OLD_WORKFLOW_ID}"
+              aws cloudformation delete-stack --stack-name "udapeople-backend-${OLD_WORKFLOWID}"
+              aws cloudformation delete-stack --stack-name "udapeople-frontend-${OLD_WORKFLOWID}"
             fi                    
         
 workflows:
